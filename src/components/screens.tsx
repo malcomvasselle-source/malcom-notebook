@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Data, Note, Week, blanks, countExpressions, newLines, newNote, newWeek, today } from "@/lib/store";
 import { Field, Header, LineList, Logo, Sparkle } from "./ui";
 import Drawing from "./Drawing";
+import Pronounce from "./Pronounce";
 
 type Upd = (fn: (d: Data) => Data) => void;
 const fmt = (d: string) => (d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "");
@@ -37,6 +38,11 @@ export function Home({ data }: { data: Data }) {
       <a className="card big" href="#/weeks">
         <Sparkle size={22} />
         <div><h3>Weekly Progress</h3><p>Le bilan de ta semaine : bien, à améliorer, objectifs.</p></div>
+        <i>›</i>
+      </a>
+      <a className="card big" href="#/say">
+        <Sparkle size={22} />
+        <div><h3>Prononciation</h3><p>Écoute un mot dans de vraies vidéos (YouGlish).</p></div>
         <i>›</i>
       </a>
       <button className="cta" onClick={() => { const n = newNote(); local(n); }}>＋ Nouvelle page de notes</button>
@@ -159,6 +165,7 @@ export function NoteEditor({ id, data, update }: { id: string; data: Data; updat
                 <input className="main" value={l.text} placeholder={i === 0 ? "Mot ou expression" : ""} onChange={(e) => setLine(i, "text", e.target.value)} />
                 {(l.text || l.note) && <input className="sub" value={l.note} placeholder="Sens / exemple (optionnel)" onChange={(e) => setLine(i, "note", e.target.value)} />}
               </div>
+              {l.text.trim() && <a className="say" href={`#/say/${encodeURIComponent(l.text.trim())}`} aria-label="Écouter la prononciation">🔊</a>}
             </div>
           ))}
           <button className="link" onClick={() => patch({ lines: [...current.lines, ...newLines(5)] })}>+ 5 lignes de plus</button>
@@ -272,6 +279,22 @@ export function Settings({ data, replace }: { data: Data; replace: (d: Data) => 
         <button className="cta danger" onClick={reset}>Tout effacer</button>
         <p className="muted center">Astuce : sur iPhone, Safari → Partager → « Sur l'écran d'accueil » ; sur Android, menu → « Installer l'application ».</p>
       </div>
+    </div>
+  );
+}
+
+/* ───────── Prononciation (YouGlish) ───────── */
+export function Say({ q }: { q: string }) {
+  return (
+    <div className="page">
+      <header className="head">
+        <button className="back" onClick={() => (history.length > 1 ? history.back() : go("#/"))} aria-label="Retour">‹</button>
+        <div className="head-t"><h1>Prononciation</h1><p>Entends-le dans la vraie vie</p></div>
+      </header>
+      <Pronounce key={q} initial={q} />
+      <a className="card" href="https://www.languagereactor.com/" target="_blank" rel="noreferrer">
+        <div><h3>Language Reactor ↗</h3><p>Sous-titres interactifs sur YouTube et Netflix (extension Chrome sur ordinateur).</p></div>
+      </a>
     </div>
   );
 }

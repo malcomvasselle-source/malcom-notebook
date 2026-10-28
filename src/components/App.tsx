@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
-import { Home, Notes, NoteEditor, Settings, StartDoc, WeekEditor, Weeks } from "./screens";
+import { Home, Notes, NoteEditor, Say, Settings, StartDoc, WeekEditor, Weeks } from "./screens";
 
 export default function App() {
   const { data, ready, update, replace } = useStore();
@@ -23,6 +23,7 @@ export default function App() {
     case "note": view = <NoteEditor key={arg} id={arg} data={data} update={update} />; break;
     case "weeks": view = <Weeks data={data} update={update} />; break;
     case "week": view = <WeekEditor key={arg} id={arg} data={data} update={update} />; break;
+    case "say": view = <Say q={decodeURIComponent(arg ?? "")} />; break;
     case "settings": view = <Settings data={data} replace={replace} />; break;
     default: view = <Home data={data} />;
   }
