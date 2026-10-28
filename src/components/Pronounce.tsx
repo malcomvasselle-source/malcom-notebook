@@ -35,9 +35,11 @@ export default function Pronounce({ initial }: { initial: string }) {
   const [total, setTotal] = useState(0);
   const host = useRef<HTMLDivElement>(null);
   const widget = useRef<any>(null);
+  const found = useRef(false);
 
   useEffect(() => {
     let dead = false;
+    found.current = false;
     if (!query.trim()) { setStatus("idle"); return; }
     setStatus("loading");
     loadYG()
@@ -58,8 +60,9 @@ export default function Pronounce({ initial }: { initial: string }) {
             markerColor: "#fde68a",
             restrictionMode: 1,
             events: {
-              onFetchDone: (e: any) => { if (dead) return; setTotal(e.totalResult); setStatus(e.totalResult === 0 ? "empty" : "ok"); },
-              onError: () => !dead && setStatus("error"),
+              onFetchDone: (e: any) => { if (dead) return; found.current = e.totalResult > 0; setTotal(e.totalResult); setStatus(e.totalResult === 0 ? "empty" : "ok"); },
+              // Une vidéo injouable déclenche onError alors que le lecteur fonctionne : on n'affiche l'erreur que si rien n'a été trouvé.
+              onError: () => { if (!dead && !found.current) setStatus("error"); },
             },
           });
         }
@@ -86,7 +89,12 @@ export default function Pronounce({ initial }: { initial: string }) {
       {status === "idle" && <p className="muted center">Tape un mot pour l'entendre prononcé par de vrais locuteurs (YouTube).</p>}
       {status === "loading" && <p className="muted center">Recherche…</p>}
       {status === "empty" && <p className="muted center">Aucun résultat pour « {query} » avec cet accent. Essaie un autre accent ou une autre orthographe.</p>}
-      {status === "error" && <p className="muted center">Impossible de charger YouGlish (connexion requise).</p>}
+      {status === "error" && (
+        <p className="muted center">
+          YouGlish n'a pas pu charger ce mot (réseau, bloqueur de pub ou vidéo indisponible).{" "}
+          <a href={`https://youglish.com/pronounce/${encodeURIComponent(query.trim())}/english/${accent}`} target="_blank" rel="noreferrer">Ouvrir sur youglish.com ↗</a>
+        </p>
+      )}
       {status === "ok" && <p className="muted center">{total} extrait{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}. Utilise les flèches du lecteur pour passer au suivant.</p>}
       <p className="muted center small">Vidéos et sous-titres fournis par <a href="https://youglish.com" target="_blank" rel="noreferrer">YouGlish</a> · <a href="https://www.youtube.com/t/terms" target="_blank" rel="noreferrer">Conditions YouTube</a> · <a href="https://www.google.com/policies/privacy" target="_blank" rel="noreferrer">Confidentialité Google</a></p>
     </div>
