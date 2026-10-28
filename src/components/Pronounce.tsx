@@ -47,9 +47,12 @@ export default function Pronounce({ initial }: { initial: string }) {
         if (dead || !host.current) return;
         if (!widget.current) {
           host.current.innerHTML = "";
+          // Le widget YouGlish exige un élément avec un id, déjà présent dans le DOM.
           const el = document.createElement("div");
+          const wid = "yg-" + Math.random().toString(36).slice(2, 9);
+          el.id = wid;
           host.current.appendChild(el);
-          widget.current = new YG.Widget(el, {
+          widget.current = new YG.Widget(wid, {
             width: Math.min(host.current.clientWidth || 360, 520),
             components: 4 + 8 + 16 + 64,
             captionSize: 22,
